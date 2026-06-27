@@ -22,7 +22,7 @@ const identifyUser = async (req, res, next) => {
     try{
         const decoded = jwt.verify(token, config.JWT_SECRET);
         
-        const user = await checkUser(null, decoded.id);
+        const user = await checkUser(null, decoded.id, null);
 
         if(!user) {
             const error = new Error("Unauthorized2");

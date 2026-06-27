@@ -1,7 +1,6 @@
-import userModel from "../models/user.model.js"
 import jwt from "jsonwebtoken"
 import config from "../config/config.js"
-import { checkUser, registerUser, setToken } from "../dao/auth.dao.js"
+import { checkUser, localRegisterUser, googleRegisterUser ,setToken } from "../dao/auth.dao.js"
 
 
 const generateToken = (user, res, message) => {
@@ -9,7 +8,11 @@ const generateToken = (user, res, message) => {
         id : user._id,
     }, config.JWT_SECRET,{expiresIn : "7d"});
 
-    res.cookie("token", token);
+    res.cookie("token", token, {
+        httpOnly: true,
+        sameSite: "lax",
+        maxAge: 7 * 24 * 60 * 60 * 1000
+    });
 
     res.status(200).json({
         message : message,
@@ -24,7 +27,7 @@ const generateToken = (user, res, message) => {
 export const registerController = async (req, res, next) => {
     const {name, email, password} = req.body;
 
-    const isUserExists = await checkUser(email, null);
+    const isUserExists = await checkUser(email, null, null);
 
     if(isUserExists) {
         const error = new Error("User already exists with this email address.");
@@ -32,7 +35,13 @@ export const registerController = async (req, res, next) => {
         return next(error);
     }
 
-    const user = await registerUser(name, email, password);
+    if (!password) {
+        const error = new Error("Password is required for local signup.");
+        error.statusCode = 400;
+        return next(error);
+    }
+
+    const user = await localRegisterUser(name, email, password);
 
     generateToken(user, res, "User Registered SuccessFully.");
 }
@@ -40,10 +49,16 @@ export const registerController = async (req, res, next) => {
 export const loginController = async (req, res, next) => {
     const {email, password} = req.body;
 
-    const isUserExists = await checkUser(email, null);
+    const isUserExists = await checkUser(email, null, null);
 
     if(!isUserExists) {
         const error = new Error("Invalid email or password");
+        error.statusCode = 401;
+        return next(error);
+    }
+
+    if (isUserExists.authProvider === "google") {
+        const error = new Error("Please Continue with google.");
         error.statusCode = 401;
         return next(error);
     }
@@ -84,4 +99,33 @@ export const getMeController = async (req, res, next) => {
             email : user.email
         }
     })
+}
+
+export const googleAuthCallback = async (req, res, next) => {
+
+    const googleId = req.user.id;
+    const name = req.user.displayName;
+    const email = req.user?.emails?.[0];
+
+    if(!email?.value || !email?.verified){
+        const error = new Error("User Email address not found or it is not verified.");
+        error.statusCode = 404;
+        return next(error);
+    }
+
+    const userByGoogleId = await checkUser(null, null, googleId);
+
+    if (userByGoogleId) {
+        return generateToken(userByGoogleId, res, "User Logged In SuccessFully.");
+    }
+
+    const userByEmail = await checkUser(email.value, null, null);
+
+    if (userByEmail) {
+        return generateToken(userByEmail, res, "User logged In SuccessFully.");
+    }
+
+    const user = await googleRegisterUser(name, email.value, 'google', googleId);
+
+    generateToken(user, res, "User Registered SuccessFully.");
 }

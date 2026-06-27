@@ -1,11 +1,12 @@
 import userModel from "../models/user.model.js"
 import redis from "../config/redis.js";
 
-export const checkUser = async (email, id) => {
+export const checkUser = async (email, id, googleId) => {
     const orConditions = [];
 
     if(email) orConditions.push({email});
     if(id) orConditions.push({_id : id}); 
+    if(googleId) orConditions.push({googleId}); 
 
     if(orConditions.length ===  0) return null;
 
@@ -14,10 +15,19 @@ export const checkUser = async (email, id) => {
     return isUserExists;
 }
 
-export const registerUser = async (name, email, password) => {
+export const localRegisterUser = async (name, email, password) => {
 
     const user = await userModel.create({
         name, email, password
+    })
+
+    return user;
+}
+
+export const googleRegisterUser = async (name, email, authProvider, googleId) => {
+
+    const user = await userModel.create({
+        name, email, authProvider, googleId
     })
 
     return user;
