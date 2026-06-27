@@ -1,7 +1,8 @@
 import userModel from "../models/user.model.js"
 import jwt from "jsonwebtoken"
 import config from "../config/config.js"
-import { checkUser, registerUser } from "../dao/auth.dao.js"
+import { checkUser, registerUser, setToken } from "../dao/auth.dao.js"
+
 
 const generateToken = (user, res, message) => {
     const token = jwt.sign({
@@ -23,7 +24,7 @@ const generateToken = (user, res, message) => {
 export const registerController = async (req, res, next) => {
     const {name, email, password} = req.body;
 
-    const isUserExists = await checkUser(email);
+    const isUserExists = await checkUser(email, null);
 
     if(isUserExists) {
         const error = new Error("User already exists with this email address.");
@@ -39,7 +40,7 @@ export const registerController = async (req, res, next) => {
 export const loginController = async (req, res, next) => {
     const {email, password} = req.body;
 
-    const isUserExists = await checkUser(email);
+    const isUserExists = await checkUser(email, null);
 
     if(!isUserExists) {
         const error = new Error("Invalid email or password");
@@ -56,4 +57,31 @@ export const loginController = async (req, res, next) => {
     }
 
     generateToken(isUserExists, res, "User Logged In SuccessFully.");
+}
+
+export const logoutController = async (req, res, next) => {
+    const token = req.cookies.token;
+
+    res.clearCookie("token");
+
+    await setToken(token);
+
+    res.status(201).json({
+        message : "User logout SuccessFull."
+    })
+
+}
+
+export const getMeController = async (req, res, next) => {
+    const user = req.user;
+
+    res.status(200).json({
+        message : "User Fetched SuccessFully",
+        success : true,
+        user : {
+            id : user._id,
+            name : user.name,
+            email : user.email
+        }
+    })
 }

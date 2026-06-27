@@ -1,5 +1,6 @@
 import app from "./src/app.js"
 import connectToDB from "./src/config/database.js";
+import redis from "./src/config/redis.js";
 
 connectToDB();
 
