@@ -1,11 +1,29 @@
 import userModel from "../models/user.model.js"
 import jwt from "jsonwebtoken"
 import config from "../config/config.js"
+import { checkUser, registerUser } from "../dao/auth.dao.js"
+
+const generateToken = (user, res, message) => {
+    const token = jwt.sign({
+        id : user._id,
+    }, config.JWT_SECRET,{expiresIn : "7d"});
+
+    res.cookie("token", token);
+
+    res.status(200).json({
+        message : message,
+        success : true,
+        user : {
+            name : user.name,
+            email : user.email
+        }
+    })
+}
 
 export const registerController = async (req, res, next) => {
     const {name, email, password} = req.body;
 
-    const isUserExists = await userModel.findOne({email});
+    const isUserExists = await checkUser(email);
 
     if(isUserExists) {
         const error = new Error("User already exists with this email address.");
@@ -13,22 +31,29 @@ export const registerController = async (req, res, next) => {
         return next(error);
     }
 
-    const user = await userModel.create({
-        name, email, password
-    })
+    const user = await registerUser(name, email, password);
 
-    const token = jwt.sign({
-        id : user._id,
-    },config.JWT_SECRET,{expiresIn : "7d"});
+    generateToken(user, res, "User Registered SuccessFully.");
+}
 
-    res.cookie("token", token);
+export const loginController = async (req, res, next) => {
+    const {email, password} = req.body;
 
-    return res.status(201).json({
-        message : "User Registered Successfull",
-        success : true,
-        user : {
-            name : user.name, 
-            email : user.email
-        }
-    })
+    const isUserExists = await checkUser(email);
+
+    if(!isUserExists) {
+        const error = new Error("Invalid email or password");
+        error.statusCode = 401;
+        return next(error);
+    }
+
+    const isMatch = await isUserExists.comparePassword(password);
+
+    if(!isMatch){
+        const error = new Error("Invalid Email or Password");
+        error.statusCode = 401;
+        return next(error);
+    }
+
+    generateToken(isUserExists, res, "User Logged In SuccessFully.");
 }
