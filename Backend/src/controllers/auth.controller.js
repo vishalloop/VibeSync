@@ -111,21 +111,24 @@ export const googleAuthCallback = async (req, res, next) => {
         const error = new Error("User Email address not found or it is not verified.");
         error.statusCode = 404;
         return next(error);
-    }
+    };
 
-    const userByGoogleId = await checkUser(null, null, googleId);
+    let user = await checkUser(email.value, null, googleId);
 
-    if (userByGoogleId) {
-        return generateToken(userByGoogleId, res, "User Logged In SuccessFully.");
-    }
+    if (!user) {
+        user = await googleRegisterUser(name, email.value, 'google', googleId);
+    };
 
-    const userByEmail = await checkUser(email.value, null, null);
+    const token = jwt.sign({
+        id : user._id,
+    }, config.JWT_SECRET,{expiresIn : "7d"});
 
-    if (userByEmail) {
-        return generateToken(userByEmail, res, "User logged In SuccessFully.");
-    }
+    res.cookie("token", token, {
+        httpOnly: true,
+        secure: config.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 7 * 24 * 60 * 60 * 1000
+    });
 
-    const user = await googleRegisterUser(name, email.value, 'google', googleId);
-
-    generateToken(user, res, "User Registered SuccessFully.");
+    res.redirect("http://localhost:5173/");
 }

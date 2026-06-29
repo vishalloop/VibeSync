@@ -12,6 +12,7 @@ const getEnv = (key) => {
 };
 
 const config = {
+    NODE_ENV : getEnv("NODE_ENV"),
     MONGO_URI: getEnv("MONGO_URI"),
     JWT_SECRET: getEnv("JWT_SECRET"),
     REDIS_HOST: getEnv("REDIS_HOST"),

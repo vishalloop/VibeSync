@@ -3,6 +3,7 @@ import {registerValidation, loginValidation}  from "../validators/auth.validator
 import {registerController, loginController, logoutController, getMeController, googleAuthCallback} from "../controllers/auth.controller.js";
 import identifyUser from "../middleware/auth.middleware.js";
 import passport from "passport";
+import config from "../config/config.js";
 
 const authRouter = express.Router();
 
@@ -16,7 +17,10 @@ authRouter.get("/google",
 )
 
 authRouter.get("/google/callback", 
-    passport.authenticate('google',{ session : false, failureRedirect : '/'}),
+    passport.authenticate('google',{ 
+        session : false, 
+        failureRedirect : config.NODE_ENV == "development" ? "http://localhost:5173/login" : "/login"
+    }),
     googleAuthCallback
 )
 
