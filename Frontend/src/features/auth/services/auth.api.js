@@ -1,7 +1,7 @@
 import axios from "axios"
 
 const authApiInstance = axios.create({
-    baseURL : "http://loacalhost:3000/api/auth",
+    baseURL : "/api/auth",
     withCredentials : true,
 });
 

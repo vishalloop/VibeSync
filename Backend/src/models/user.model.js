@@ -22,12 +22,13 @@ const userSchema = new mongoose.Schema({
     },
     googleId : {
         type : String,
-        default : null
+        unique : true,
+        sparse : true
     }
 })
 
 userSchema.pre("save",async function () {
-    if(!this.isModified("password")) return true;
+    if(!this.password || !this.isModified("password")) return true;
 
     const hash = await bcrypt.hash(this.password, 10);
     this.password = hash;

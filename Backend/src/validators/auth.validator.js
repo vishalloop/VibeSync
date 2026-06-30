@@ -7,8 +7,8 @@ const validate = (req, res, next) => {
         return next();
     }
 
-    const error = errors.array();
-    error.statusCode = 404;
+    const error = new Error(errors.array()[0].msg)
+    error.statusCode = 422;
     return next(error);
 }
 
@@ -16,9 +16,7 @@ export const registerValidation = [
     body("name").custom((value)=>{
         const nameRegex = /^[\p{L} .'-]+$/u;
         if(!nameRegex.test(value)){
-            const error = "Please enter Valid Name";
-            error.statusCode = 422;
-            return next(error);
+            throw new Error("Please enter Valid Name");
         };
         return true;
     }).withMessage("Name must be string"),
@@ -29,6 +27,6 @@ export const registerValidation = [
 
 export const loginValidation = [
     body("email").isEmail().withMessage("Please enter valid email address."),
-    body("password").isStrongPassword().withMessage("Please Enter Valid Email address"),
+    body("password").notEmpty().withMessage("Please Enter Valid Password"),
     validate
 ]
