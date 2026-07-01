@@ -4,7 +4,7 @@ VibeSync is a full-stack mood-based music web application that detects a user's 
 
 ## Live Link
 
-Live demo: _Add your deployed project link here_
+Live demo: https://vibesync-wyr9.onrender.com/
 
 ## Screenshots
 
