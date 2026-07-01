@@ -113,6 +113,8 @@ Create a `.env` file inside `Backend/`:
 
 ```env
 NODE_ENV=development
+FRONTEND_URL=http://localhost:5173
+PORT = 3000
 MONGO_URI=your_mongodb_connection_string
 JWT_SECRET=your_jwt_secret
 REDIS_HOST=your_redis_host
@@ -121,7 +123,7 @@ REDIS_PASSWORD=your_redis_password
 GOOGLE_CLIENT_ID=your_google_client_id
 GOOGLE_CLIENT_SECRET=your_google_client_secret
 GOOGLE_CALLBACK_URL=http://localhost:3000/api/auth/google/callback
-FRONTEND_URL=http://localhost:5173
+YOUTUBE_API_KEY=your_youtube_api_key
 ```
 
 ### 4. Start the backend

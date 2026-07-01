@@ -13,6 +13,8 @@ const getEnv = (key) => {
 
 const config = {
     NODE_ENV : getEnv("NODE_ENV"),
+    FRONTEND_URL : getEnv("FRONTEND_URL"),
+    PORT : getEnv("PORT"),
     MONGO_URI: getEnv("MONGO_URI"),
     JWT_SECRET: getEnv("JWT_SECRET"),
     REDIS_HOST: getEnv("REDIS_HOST"),
@@ -21,7 +23,7 @@ const config = {
     GOOGLE_CLIENT_ID: getEnv("GOOGLE_CLIENT_ID"),
     GOOGLE_CLIENT_SECRET: getEnv("GOOGLE_CLIENT_SECRET"),
     GOOGLE_CALLBACK_URL: getEnv("GOOGLE_CALLBACK_URL"),
-    FRONTEND_URL : getEnv("FRONTEND_URL"),
+    YOUTUBE_API_KEY : getEnv("YOUTUBE_API_KEY"),
 };
 
 export default config;

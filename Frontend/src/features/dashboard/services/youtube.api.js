@@ -1,5 +1,3 @@
-const YOUTUBE_SEARCH_URL = "https://www.googleapis.com/youtube/v3/search";
-
 const getVideoId = (item) => {
   if (typeof item.id === "string") return item.id;
   return item.id?.videoId;
@@ -12,32 +10,17 @@ const cleanText = (value) => {
 };
 
 export const fetchMoodTracks = async ({ query, pageToken = "" }) => {
-  const apiKey = import.meta.env.VITE_YOUTUBE_API_KEY;
-
-  if (!apiKey) {
-    throw new Error("Missing VITE_YOUTUBE_API_KEY");
-  }
-
-  const params = new URLSearchParams({
-    part: "snippet",
-    maxResults: "8",
-    q: query,
-    type: "video",
-    videoCategoryId: "10",
-    videoEmbeddable: "true",
-    safeSearch: "none",
-    key: apiKey,
-  });
+  const params = new URLSearchParams({ query });
 
   if (pageToken) {
     params.set("pageToken", pageToken);
   }
 
-  const response = await fetch(`${YOUTUBE_SEARCH_URL}?${params.toString()}`);
+  const response = await fetch(`/api/youtube/search?${params.toString()}`);
   const data = await response.json();
 
   if (!response.ok) {
-    throw new Error(data.error?.message || "Unable to fetch YouTube songs");
+    throw new Error(data.message || "Unable to fetch YouTube songs");
   }
 
   return {
