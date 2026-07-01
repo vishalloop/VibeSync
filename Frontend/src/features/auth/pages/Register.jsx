@@ -44,7 +44,7 @@ const Register = () => {
   }
 
   const handleGoogleLogin = () => {
-    window.location.href = "http://localhost:3000/api/auth/google";
+    window.location.href = "https://vibesync-wyr9.onrender.com/api/auth/google";
   }
 
   return (
